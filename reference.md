@@ -30,24 +30,27 @@ interface BookProps {
   author: string;
 }
 
+// Use the f.query(select * from collectionName)
 const books = (await f.query("select * from books") as BookProps[]);
 ```
 
 ## Add a data to a collection
 E.g. add a book to the books collection
 ```ts
-// Use the f.query(insert into collectionName, object);
+// Use the f.query(insert into collectionName, object)
 await f.query("insert into books", { title, author });
 ```
 
 ## Update data in a collection
 E.g. update a book in the books collection
 ```ts
+// Use the f.query(update collectionName where id == documentId, updatedFields)
 await f.query(`update books where bookId == ${bookId}`, { author: newAuthor });
 ```
 
 ## Delete a data in a collection
 E.g. delete a book in the books collection
 ```ts
+// Use the f.query(delete from collectionName where id == documentId)
 await f.query(`delete from books where bookId == ${bookId}`)
 ```
