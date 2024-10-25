@@ -1,5 +1,5 @@
 // fireclient query
-// Version 0.0.2
+// Version 0.0.1
 // Author: Kevin
 // LICENSE: MIT
 
@@ -38,6 +38,19 @@ export class FireclientQuery {
         return this.db;
     }
 
+    /**
+        // Sample usage:
+        // Connect to fireclient
+        const firebaseConfig = {
+            apiKey: "xxxxx",
+            authDomain: "xxxxx",
+            projectId: "xxxxx",
+            storageBucket: "xxxxx",
+            messagingSenderId: "xxxxx",
+            appId: "xxxxx"
+        };
+        const f = new Fireclient(firebaseConfig);
+    */
     constructor(firebaseConfig: FirebaseConfigProps) {
         if (firebaseConfig) {
             this.app = initializeApp(firebaseConfig);
@@ -50,6 +63,15 @@ export class FireclientQuery {
     }
 
     // Get a single data from a collection
+    /**
+        // Sample usage:
+        interface BookProps {
+            id?: string;
+            title: string;
+            author: string;
+        }
+        const book = (await f.getSingleData("books", searchId)) as BookProps | null;
+    */
     async getSingleData<T>(collectionName: string, docId: string): Promise<T|null> {
         const docSnap: DocumentSnapshot<DocumentData, DocumentData> = await getDoc(doc(this.db, collectionName, docId));
         if (docSnap.exists()) {
@@ -57,11 +79,21 @@ export class FireclientQuery {
         } 
         else {
             console.error(`Fireclient error: document id ${docId} does not exists`);
+            // return null;
             return null;
         }
     }
 
     // Get all data from a collection as an array
+    /**
+        // Sample usage:
+        async function getBooks() {
+            const books = (await f.getAllData("books"));
+            if (books) {
+                return books;
+            }
+        }
+    */
     async getAllData<T>(collectionName: string): Promise<T[]> {
         const querySnapshot: QuerySnapshot = await getDocs(collection(this.db, collectionName));
         const data: T[] = [];
@@ -71,18 +103,20 @@ export class FireclientQuery {
         });
         return data;
     }
-
-    // Get all single field data from a collection as an array
-    async getAllSingleFieldFromAllData<T>(collectionName: string, fieldName: keyof T): Promise<T[keyof T][]> {
-        const querySnapshot: QuerySnapshot = await getDocs(collection(this.db, collectionName));
-        const fieldValues: T[keyof T][] = querySnapshot.docs.map((doc) => {
-            const docData = doc.data() as T;
-            return docData[fieldName];
-        });
-        return fieldValues;
-    }
     
     // Add a data to a collection
+    /**
+        // Sample usage:
+        async function addBook() {
+            const book = await f.addData("books", {
+                title: "Harry Potter",
+                author: "JK Rowling"
+            });
+            if (book) {
+                alert("Book added");
+            }
+        }
+    */
     async addData(collectionName: string, fields: object): Promise<string> {
         try {
             const docRef: DocumentReference<object, DocumentData> = 
@@ -96,12 +130,29 @@ export class FireclientQuery {
     }
 
     // Update a data in a collection
+    /**
+        // Sample usage:
+        async function updateAuthor(bookId: string) {
+            const newAuthor = window.prompt("Enter new author> ");
+            if (newAuthor) {
+            await f.updateData("books", bookId, { author: newAuthor })
+                .then(() => getBooks());
+            }
+        }
+    */
     async updateData(collectionName: string, docId: string, updatedFields: object): Promise<void> {
         const docRef: DocumentReference<DocumentData, DocumentData> = doc(this.db, collectionName, docId);
         await updateDoc(docRef, updatedFields);
     }
 
     // Remove a data from a collection
+    /**
+        // Sample usage:
+        async function removeBook() {
+            await f.removeData("books", "4Hvy4Zx4k6uBjn73kPu1")
+            .then(() => alert("Book removed"));
+        }
+    */
     async removeData(collectionName: string, docId: string): Promise<void> {
         const docRef: DocumentReference<DocumentData, DocumentData> = doc(this.db, collectionName, docId);
         await deleteDoc(docRef);
@@ -125,24 +176,9 @@ export class FireclientQuery {
                 // Example usage:
                 // const books = (await f.query("select * from books") as BookProps[]);
                 case "select":
-
-                    // SELECT one record - 
-                    // Example query: select * from books where bookId == 123
-                    //                   0   1   2    3     4     5    6   7
-                    if (queryStringArray.length > 4) {
-                        if (collectionName !== "") {
-                            return await this.getSingleData(queryStringArray[3], queryStringArray[7]);
-                        }
+                    if (collectionName !== "") {
+                        return await this.getAllData(collectionName);
                     }
-                    else {
-                        // SELECT ALL - queryStringArray[1] == *
-                        if (queryStringArray[1] == "*") {
-                            if (collectionName !== "") {
-                                return await this.getAllData(collectionName);
-                            }
-                        }
-                    }
-
                     break;
             
                 // INSERT action
