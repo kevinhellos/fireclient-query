@@ -18,7 +18,7 @@ const firebaseConfig = {
 };
 
 // Create an instance of fireclient (f)
-const f = new Fireclient(firebaseConfig);
+const f = new FireclientQuery(firebaseConfig);
 ```
 
 ## Get all data
